@@ -18,6 +18,7 @@ func (h *HupWriter) signalMonitor() {
 			h.newLogFile()
 		case os.Interrupt:
 			h.removePid()
+			os.Exit(0)
 			return
 		}
 	}

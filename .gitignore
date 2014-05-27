@@ -1,5 +1,6 @@
 /tmp/
 
-*.exe
-myapp.log
+myapp.log*
 myapp.pid
+writer
+writer.exe
