@@ -54,8 +54,9 @@ func (h *HupWriter) newLogFile() (*os.File, error) {
 	// Close old file.
 	h.closeLogFile()
 	// Open new load file.
-	f, err := os.OpenFile(h.log, os.O_RDWR|os.O_APPEND, 0660)
+	f, err := os.OpenFile(h.log, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
 	if err != nil {
+		fmt.Fprintln(os.Stderr, "Failed to open log file:", err)
 		return nil, err
 	}
 	h.file = f
@@ -70,5 +71,5 @@ func writePid(pid string) {
 	}
 	defer f.Close()
 
-	fmt.Fprintf(f, "%d", pid)
+	fmt.Fprintf(f, "%d", os.Getpid())
 }
