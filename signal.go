@@ -17,6 +17,7 @@ func (h *HupWriter) signalMonitor() {
 		case syscall.SIGHUP:
 			h.newLogFile()
 		case os.Interrupt:
+			h.removePid()
 			return
 		}
 	}

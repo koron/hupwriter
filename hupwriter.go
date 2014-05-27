@@ -8,6 +8,7 @@ import (
 
 type HupWriter struct {
 	log  string
+	pid  string
 	sig  chan os.Signal
 	file *os.File
 }
@@ -18,7 +19,7 @@ func New(log, pid string) *HupWriter {
 		writePid(pid)
 	}
 	sig := make(chan os.Signal, 1)
-	h := &HupWriter{log: log, sig: sig}
+	h := &HupWriter{log: log, pid: pid, sig: sig}
 	h.signalStart()
 	return h
 }
@@ -40,6 +41,7 @@ func (h *HupWriter) Close() {
 		close(h.sig)
 		h.sig = nil
 	}
+	h.removePid()
 }
 
 func (h *HupWriter) closeLogFile() {
@@ -72,4 +74,11 @@ func writePid(pid string) {
 	defer f.Close()
 
 	fmt.Fprintf(f, "%d", os.Getpid())
+}
+
+func (h *HupWriter) removePid() {
+	if len(h.pid) == 0 {
+		return
+	}
+	os.Remove(h.pid)
 }
