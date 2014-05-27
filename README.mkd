@@ -1,0 +1,9 @@
+# HUP acceptable io.Writer
+
+```go
+import "github.com/koron/hupwriter"
+import "log"
+
+h := hupwriter.New("/var/log/myapp.log", "/var/log/myapp.pid")
+log.SetOutput(h)
+```
