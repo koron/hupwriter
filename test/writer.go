@@ -1,9 +1,10 @@
 package main
 
 import (
-	hupwriter ".."
 	"log"
 	"time"
+
+	"github.com/koron/hupwriter"
 )
 
 func main() {
