@@ -1,3 +1,12 @@
+/*
+Package hupwriter provides wrapper of os.File.
+
+The wrapper will close and reopen the file when a HUP signal is received.
+It allows easier log file rotation.
+
+By logging to hupwriter you can create log files that can be used with log
+rotation management programs such as logrotate, newsyslog, or so.
+*/
 package hupwriter
 
 import (

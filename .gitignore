@@ -1,6 +1,4 @@
-/tmp/
-
-myapp.log*
-myapp.pid
-writer
-writer.exe
+*~
+default.pgo
+tags
+tmp/
