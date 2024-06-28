@@ -15,6 +15,8 @@ import (
 	"os/signal"
 )
 
+// HupWriter wraps os.File, and will close and reopen the file when a HUP
+// signal is received.
 type HupWriter struct {
 	log  string
 	pid  string
@@ -22,17 +24,19 @@ type HupWriter struct {
 	file *os.File
 }
 
-// New creates a HupWriter.
-func New(log, pid string) *HupWriter {
+// New creates a HupWriter with a file of name.
+// It create PID file which records current process ID when pid is not empty.
+func New(name, pid string) *HupWriter {
 	if len(pid) != 0 {
 		writePid(pid)
 	}
 	sig := make(chan os.Signal, 1)
-	h := &HupWriter{log: log, pid: pid, sig: sig}
+	h := &HupWriter{log: name, pid: pid, sig: sig}
 	h.signalStart()
 	return h
 }
 
+// Write writes data to an underlying file.
 func (h *HupWriter) Write(p []byte) (int, error) {
 	if h.file == nil {
 		_, err := h.newLogFile()
@@ -43,7 +47,8 @@ func (h *HupWriter) Write(p []byte) (int, error) {
 	return h.file.Write(p)
 }
 
-func (h *HupWriter) Close() {
+// Close closes an underlying file, and stop to listening signals.
+func (h *HupWriter) Close() error {
 	h.closeLogFile()
 	if h.sig != nil {
 		signal.Stop(h.sig)
@@ -51,6 +56,7 @@ func (h *HupWriter) Close() {
 		h.sig = nil
 	}
 	h.removePid()
+	return nil
 }
 
 func (h *HupWriter) closeLogFile() {
@@ -74,6 +80,7 @@ func (h *HupWriter) newLogFile() (*os.File, error) {
 	return h.file, nil
 }
 
+// writePid
 func writePid(pid string) {
 	f, err := os.Create(pid)
 	if err != nil {
@@ -85,6 +92,7 @@ func writePid(pid string) {
 	fmt.Fprintf(f, "%d", os.Getpid())
 }
 
+// removePid removes a PID file.
 func (h *HupWriter) removePid() {
 	if len(h.pid) == 0 {
 		return
