@@ -71,16 +71,17 @@ func TestReopen(t *testing.T) {
 	}
 	defer w.Close()
 
-	logger := log.New(w, "hupwriter", 0)
+	logger := log.New(w, "[hupwriter]", 0)
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
 		cnt := 0
 		for cnt < 20 {
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 			cnt++
 			logger.Printf("%d", cnt)
+			time.Sleep(90 * time.Millisecond)
 		}
 	}()
 	go func() {
@@ -97,7 +98,6 @@ func TestReopen(t *testing.T) {
 				t.Errorf("reopen failed: %s", err)
 				break
 			}
-			break
 		}
 	}()
 	wg.Wait()
@@ -109,5 +109,17 @@ func TestReopen(t *testing.T) {
 	// TODO: check output
 	for i, e := range entries {
 		t.Logf("#%d name=%s isdir=%t mode=%04o", i, e.Name(), e.IsDir(), e.Type())
+		f, err := os.Open(filepath.Join(tmpdir, e.Name()))
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		b, err := io.ReadAll(f)
+		f.Close()
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		t.Log(string(b))
 	}
 }
