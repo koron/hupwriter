@@ -131,10 +131,19 @@ func TestReopen(t *testing.T) {
 [hupwriter]20
 `
 	bb := &bytes.Buffer{}
-	copyFile(bb, "reopen.1.log")
-	copyFile(bb, "reopen.2.log")
-	copyFile(bb, "reopen.3.log")
-	copyFile(bb, "reopen.log")
+	if err := copyFile(bb, filepath.Join(tmpdir, "reopen.1.log")); err != nil {
+		t.Fatalf("falied to copy: %s", err)
+	}
+	if err := copyFile(bb, filepath.Join(tmpdir, "reopen.2.log")); err != nil {
+		t.Fatalf("falied to copy: %s", err)
+	}
+	if err := copyFile(bb, filepath.Join(tmpdir, "reopen.3.log")); err != nil {
+		t.Fatalf("falied to copy: %s", err)
+	}
+	if err := copyFile(bb, filepath.Join(tmpdir, "reopen.log")); err != nil {
+		t.Fatalf("falied to copy: %s", err)
+	}
+
 	got := bb.String()
 	if d := cmp.Diff(want, got); d != "" {
 		t.Errorf("content mismatch: -want +got\n%s", d)
