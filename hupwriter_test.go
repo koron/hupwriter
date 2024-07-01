@@ -1,6 +1,7 @@
 package hupwriter_test
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -108,48 +109,50 @@ func TestReopen(t *testing.T) {
 	wg.Wait()
 
 	// Check contents of log files.
-	testFileContents(t, filepath.Join(tmpdir, "reopen.1.log"), `[hupwriter]1
+	want := `[hupwriter]1
 [hupwriter]2
 [hupwriter]3
 [hupwriter]4
 [hupwriter]5
-`)
-	testFileContents(t, filepath.Join(tmpdir, "reopen.2.log"), `[hupwriter]6
+[hupwriter]6
 [hupwriter]7
 [hupwriter]8
 [hupwriter]9
 [hupwriter]10
-`)
-	testFileContents(t, filepath.Join(tmpdir, "reopen.3.log"), `[hupwriter]11
+[hupwriter]11
 [hupwriter]12
 [hupwriter]13
 [hupwriter]14
 [hupwriter]15
-`)
-
-	testFileContents(t, filepath.Join(tmpdir, "reopen.log"), `[hupwriter]16
+[hupwriter]16
 [hupwriter]17
 [hupwriter]18
 [hupwriter]19
 [hupwriter]20
-`)
-}
-
-func testFileContents(t *testing.T, name string, want string) {
-	t.Helper()
-	f, err := os.Open(name)
-	if err != nil {
-		t.Errorf("failed to open file: %s", err)
-		return
-	}
-	b, err := io.ReadAll(f)
-	f.Close()
-	if err != nil {
-		t.Errorf("failed to read file: %s", err)
-		return
-	}
-	got := string(b)
+`
+	bb := &bytes.Buffer{}
+	copyFile(bb, "reopen.1.log")
+	copyFile(bb, "reopen.2.log")
+	copyFile(bb, "reopen.3.log")
+	copyFile(bb, "reopen.log")
+	got := bb.String()
 	if d := cmp.Diff(want, got); d != "" {
 		t.Errorf("content mismatch: -want +got\n%s", d)
 	}
+}
+
+func copyFile(dst io.Writer, name string) error {
+	f, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	n, err := io.Copy(dst, f)
+	if err != nil {
+		return err
+	}
+	if n < 40 {
+		return fmt.Errorf("too few bytes (%d) read", n)
+	}
+	return err
 }
