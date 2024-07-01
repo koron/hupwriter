@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"testing"
 	"time"
@@ -62,9 +63,12 @@ func TestBasic(t *testing.T) {
 }
 
 func TestReopen(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("windows can't rename opening log file")
+	}
 	tmpdir := t.TempDir()
-	name := filepath.Join(tmpdir, "basic.log")
-	pid := filepath.Join(tmpdir, "basic.pid")
+	name := filepath.Join(tmpdir, "reopen.log")
+	pid := filepath.Join(tmpdir, "reopen.pid")
 	w, err := hupwriter.New(name, pid)
 	if err != nil {
 		t.Fatalf("failed to create hupwriter: %s", err)
@@ -90,7 +94,7 @@ func TestReopen(t *testing.T) {
 		for cnt < 3 {
 			time.Sleep(500 * time.Millisecond)
 			cnt++
-			rotate := filepath.Join(tmpdir, fmt.Sprintf("basic.%d.log", cnt))
+			rotate := filepath.Join(tmpdir, fmt.Sprintf("reopen.%d.log", cnt))
 			if err := os.Rename(name, rotate); err != nil {
 				t.Errorf("failed to rename: %s", err)
 			}
