@@ -14,7 +14,10 @@ func TestBasic(t *testing.T) {
 	tmpdir := t.TempDir()
 	name := filepath.Join(tmpdir, "basic.log")
 	pid := filepath.Join(tmpdir, "basic.pid")
-	w := hupwriter.New(name, pid)
+	w, err := hupwriter.New(name, pid)
+	if err != nil {
+		t.Fatalf("failed to create hupwriter: %s", err)
+	}
 
 	// Check pid file
 	if _, err := os.Stat(pid); err != nil {
