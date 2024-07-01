@@ -8,7 +8,10 @@ import (
 )
 
 func main() {
-	w := hupwriter.New("myapp.log", "myapp.pid")
+	w, err := hupwriter.New("myapp.log", "myapp.pid")
+	if err != nil {
+		panic("can't open log file: " + err.Error())
+	}
 	log.SetOutput(w)
 	count := 0
 	for {

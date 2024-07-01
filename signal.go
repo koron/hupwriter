@@ -15,7 +15,10 @@ func (h *HupWriter) signalMonitor() {
 	for s := range h.sig {
 		switch s {
 		case syscall.SIGHUP:
-			h.newLogFile()
+			err := h.Reopen()
+			if err != nil {
+				panic("failed to reopen the log file: " + err.Error())
+			}
 		case os.Interrupt:
 			h.removePid()
 			os.Exit(0)
