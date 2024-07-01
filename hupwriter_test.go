@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/koron/hupwriter"
 )
 
@@ -106,24 +107,49 @@ func TestReopen(t *testing.T) {
 	}()
 	wg.Wait()
 
-	entries, err := os.ReadDir(tmpdir)
+	// Check contents of log files.
+	testFileContents(t, filepath.Join(tmpdir, "reopen.1.log"), `[hupwriter]1
+[hupwriter]2
+[hupwriter]3
+[hupwriter]4
+[hupwriter]5
+`)
+	testFileContents(t, filepath.Join(tmpdir, "reopen.2.log"), `[hupwriter]6
+[hupwriter]7
+[hupwriter]8
+[hupwriter]9
+[hupwriter]10
+`)
+	testFileContents(t, filepath.Join(tmpdir, "reopen.3.log"), `[hupwriter]11
+[hupwriter]12
+[hupwriter]13
+[hupwriter]14
+[hupwriter]15
+`)
+
+	testFileContents(t, filepath.Join(tmpdir, "reopen.log"), `[hupwriter]16
+[hupwriter]17
+[hupwriter]18
+[hupwriter]19
+[hupwriter]20
+`)
+}
+
+func testFileContents(t *testing.T, name string, want string) {
+	t.Helper()
+	f, err := os.Open(name)
 	if err != nil {
-		t.Fatalf("failed to readdir: %s", err)
+		t.Errorf("failed to open file: %s", err)
+		return
 	}
-	// TODO: check output
-	for i, e := range entries {
-		t.Logf("#%d name=%s isdir=%t mode=%04o", i, e.Name(), e.IsDir(), e.Type())
-		f, err := os.Open(filepath.Join(tmpdir, e.Name()))
-		if err != nil {
-			t.Error(err)
-			continue
-		}
-		b, err := io.ReadAll(f)
-		f.Close()
-		if err != nil {
-			t.Error(err)
-			continue
-		}
-		t.Log(string(b))
+	b, err := io.ReadAll(f)
+	f.Close()
+	if err != nil {
+		t.Errorf("failed to read file: %s", err)
+		return
+	}
+	got := string(b)
+	if d := cmp.Diff(want, got); d != "" {
+		t.Errorf("content mismatch: -want +got\n%s", d)
 	}
 }
