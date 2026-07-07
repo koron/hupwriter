@@ -2,7 +2,6 @@
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/koron/hupwriter)](https://pkg.go.dev/github.com/koron/hupwriter)
 [![Actions/Go](https://github.com/koron/hupwriter/workflows/Go/badge.svg)](https://github.com/koron/hupwriter/actions?query=workflow%3AGo)
-[![Go Report Card](https://goreportcard.com/badge/github.com/koron/hupwriter)](https://goreportcard.com/report/github.com/koron/hupwriter)
 
 Package hupwriter provides wrapper of `os.File`.
 
